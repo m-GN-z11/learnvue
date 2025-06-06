@@ -126,6 +126,7 @@
             :result-image-url="currentDisplayResultImageUrl"
             :text-results="currentDisplayTextResults"
         />
+        <Logs></Logs>
       </el-col>
 
       <el-col :span="12" class="chart-col">
@@ -159,7 +160,7 @@ import ImageZoomSlider from './ImgProcess/imageZoomSlider.vue';
 import ResultsDisplay from './ImgProcess/resultsDisplay.vue';
 import ChartGird from './ImgProcess/chartGird.vue';
 import AppNotification from './ImgProcess/appNotification.vue';
-import ResultData from './ImgProcess/resultData.vue';
+import Logs from './ImgProcess/logs.vue';
 
 
 const router = useRouter();

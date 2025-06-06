@@ -47,31 +47,31 @@
   </div>
   <div>
     <ResultData
-       :idx="currentNavigationIndex"
-       :datamode="isInResultsMode"
-       :datavalue="featuresdata"
-    />   
+        :idx="currentNavigationIndex"
+        :datamode="isInResultsMode"
+        :datavalue="featuresdata"
+    />
   </div>
 </template>
 
 <script setup>
+// TODO: 临时位置，后续需要修改（第48行起是位置）
 import { computed, watch } from 'vue';
 import { ElImage, ElButton, ElSlider } from 'element-plus';
 import { Upload, Delete, ZoomIn, ZoomOut, ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue';
 import { useMultiFrameLoader } from '../../composables/useMultiFrameLoader';
-import { useNotifications } from '../../composables/useNotifications';
-import ResultData from './resultData.vue';
+import { useNotifications } from '../../composables/useNotifications'
+import ResultData from './resultData.vue'
 
 
 const props = defineProps({
   zoomLevel: { type: Number, default: 100 },
   imageRows: { type: Number, required: true },
   imageCols: { type: Number, required: true },
-  featuresdata: { type: Object, required: true},
   actualResultFrameCount: { type: Number, default: 0 },
+  featuresdata: { type: Object, required: true},
   currentResultFrameIndex: { type: Number, default: -1 }
 });
-
 
 const emit = defineEmits([
   'request-folder-select',
@@ -217,6 +217,7 @@ defineExpose({
   flex-direction: column;
   width: 100%;
   border: 1px solid #ccc;
+  /*height: 60vh;*/
   height: 40vh;
 }
 

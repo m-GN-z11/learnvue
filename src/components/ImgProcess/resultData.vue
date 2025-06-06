@@ -1,18 +1,21 @@
+/*resultData.vue*/
 <template>
   <div class="result-data-container">
-    <h4 class="table-title" v-if="datamode">特征数据 (帧: {{ idx + 1 }})</h4>
-    <h4 class="table-title" v-else>特征数据</h4>
-    
-    <el-table 
-      :data="tableData"
-      :show-header="tableData.length > 0"
-      :empty-text="emptyText"
-      style="width: 100%"
-    >
+    <div class="table-header-wrapper">
+      <h4 class="table-title">
+        {{ datamode ? `特征数据 (帧: ${idx + 1})` : '特征数据' }}
+      </h4>
+    </div>
+
+    <el-table
+        :data="tableData"
+        :show-header="tableData.length > 0 && props.datamode" :empty-text="emptyText"
+        style="width: 100%"
+        class="data-element-table" >
       <el-table-column prop="name" label="特征名称" width="250" />
       <el-table-column prop="value" label="值">
         <template #default="{ row }">
-          <span :class="row.valueClass">{{ row.displayValue }}</span>
+          <span>{{ row.displayValue }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -20,18 +23,25 @@
 </template>
 
 <script setup>
+// TODO: 添加更多的检查和日志（不重要）
 import { computed } from 'vue';
 import { ElTable, ElTableColumn } from 'element-plus';
 
 const props = defineProps({
-  idx: Number,
-  datavalue: Object,
-  datamode: Boolean,
+  idx: {
+    type: Number,
+    default: 0,
+  },
+  datavalue: {
+    type: Object,
+    default: () => ({}),
+  },
+  datamode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-
-
-// 特征定义
 const defaultFeatureKeys = [
   { name: "variance", key: "variance" },
   { name: "mean_region", key: "mean_region" },
@@ -44,39 +54,38 @@ const defaultFeatureKeys = [
   { name: "xjy_area", key: "xjy_area" },
   { name: "peak_cell_intensity", key: "peak_cell_intensity" },
   { name: "xjy_background_intensity", key: "xjy_background_intensity" },
-  { name: "tl_xs", key: "tl_xs" },
-  { name: "tl_ys", key: "tl_ys" },
-  { name: "widths", key: "widths" },
-  { name: "heights", key: "heights" }
 ];
 
-// 表格数据计算
 const tableData = computed(() => {
   if (!props.datamode) {
-    // 非数据模式：显示所有特征名称，值为N/A
     return defaultFeatureKeys.map(feature => ({
       name: feature.name,
       displayValue: 'N/A',
     }));
   }
 
-  // 数据模式：处理实际数据
   const hasData = props.datavalue && Object.keys(props.datavalue).length > 0;
-  if (!hasData) return [];
+  if (!hasData) {
+    return defaultFeatureKeys.map(feature => ({
+      name: feature.name,
+      displayValue: 'N/A',
+    }));
+  }
 
   return defaultFeatureKeys.map(feature => {
-    const featureData = props.datavalue[feature.key];
-    let displayValue = 'N/A';
-    
-    // 处理数组类型数据
-    if (Array.isArray(featureData) && 
-        props.idx >= 0 && 
-        props.idx < featureData.length) {
-      displayValue = featureData[props.idx].toFixed(4);
-    } 
-    // 处理单值数据
-    else if (typeof featureData === 'number') {
-      displayValue = featureData.toFixed(4);
+    const featureRawValue = props.datavalue[feature.key];
+    let displayValue = 'N/A'; // 默认值
+
+    if (featureRawValue !== undefined && featureRawValue !== null) {
+      if (Array.isArray(featureRawValue) &&
+          props.idx >= 0 &&
+          props.idx < featureRawValue.length &&
+          typeof featureRawValue[props.idx] === 'number') {
+        displayValue = featureRawValue[props.idx].toFixed(4);
+      }
+      else if (typeof featureRawValue === 'number') {
+        displayValue = featureRawValue.toFixed(4);
+      }
     }
 
     return {
@@ -86,39 +95,62 @@ const tableData = computed(() => {
   });
 });
 
-// 空状态文本
 const emptyText = computed(() => {
-  if (!props.datamode) return '无特征数据可显示';
-  return '当前帧无有效特征数据';
+  if (props.datamode && (!props.datavalue || Object.keys(props.datavalue).length === 0)) {
+    return '当前帧无有效特征数据';
+  }
+  return '无数据';
 });
-
-
 </script>
 
-// 表格换成element的表格，不要用vue原生的
-// 现在是动态分布，改成显示框绝对静止
-// 布局在多帧的组件里调整一下，放到最下面
-// 样式颜色风格尽量和其他组件一致
 <style scoped>
+.result-data-container {
+  width: 100%;
+  background-color: rgb(21, 45, 81);
+  border-radius: 6px;
+  color: white;
+  margin-top: 10px;
+  font-weight: bold;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.table-header-wrapper {
+  padding: 10px 10px 0px 10px;
+  background-color: rgb(21, 45, 81);
+}
 
 .table-title {
-  color: #f3f7fa;
+  color: white;
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1em;
   text-align: left;
-  padding-left: 5px;
 }
 
+.data-element-table {
+  --el-table-text-color: white;
+  --el-table-border-color: rgb(75, 75, 75);
+  --el-table-bg-color: rgb(56, 56, 56);
+  --el-table-header-text-color: white;
+  --el-table-header-bg-color: rgb(56, 56, 56);
+  --el-table-tr-bg-color: rgb(56, 56, 56);
+  --el-table-row-hover-bg-color: rgb(55, 75, 95);
+  --el-table-empty-text-color: white;
+  border: none;
+}
 
-.el-table {
-      --el-table-border-color: rgba(1, 6, 12, 0.4);
-      --el-table-header-bg-color: rgba(2, 7, 78, 0.7);
-      --el-table-tr-bg-color: rgba(12, 26, 45, 0.5);
-      --el-table-row-hover-bg-color: rgba(24, 48, 85, 0.7);
-      --el-table-header-text-color: #e6e9ee;
-      --el-table-text-color: #e7ebee;
-      border-radius: 0 0 10px 10px;
-      overflow: hidden;
-    }
+.data-element-table :deep(.el-table__header-wrapper th),
+.data-element-table :deep(.el-table__body-wrapper td) {
+  padding: 8px 10px;
+  font-size: 0.9em;
+}
+
+.data-element-table :deep(.el-table__header-wrapper th) {
+  font-weight: bold;
+}
+
+.data-element-table :deep(.el-table__inner-wrapper)::before {
+  display: none;
+}
 </style>
