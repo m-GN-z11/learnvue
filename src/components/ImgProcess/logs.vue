@@ -18,31 +18,40 @@
       </label>
     </div>
     
-    <!-- 日志显示区域 - 添加横向滚动 -->
+    <!-- 日志显示区域 -->
     <div class="log-display-container">
-      <div ref="logDisplay" class="log-display">
-        <div 
-          v-for="(log, index) in logs" 
-          :key="index" 
-          :class="['log-entry', logLevelClass(log)]"
-        >
-          <span class="timestamp">{{ extractTimestamp(log) }}</span>
-          <span class="thread">{{ extractThread(log) }}</span>
-          <span class="level">{{ extractLevel(log) }}</span>
-          <span class="logger">{{ extractLogger(log) }}</span>
-          <span class="message">{{ extractMessage(log) }}</span>
+      <el-scrollbar wrap-class="scrollbar-wrapper">
+        <div ref="logDisplay" class="log-display">
+          <div 
+            v-for="(log, index) in logs" 
+            :key="index" 
+            :class="['log-entry', logLevelClass(log)]"
+          >
+            <span class="timestamp">{{ extractTimestamp(log) }}</span>
+            <span class="thread">{{ extractThread(log) }}</span>
+            <span class="level">{{ extractLevel(log) }}</span>
+            <span class="logger">{{ extractLogger(log) }}</span>
+            <span class="message">{{ extractMessage(log) }}</span>
+          </div>
+          <div v-if="logs.length === 0" class="empty-logs">
+            {{ emptyMessage }}
+          </div>
         </div>
-        <div v-if="logs.length === 0" class="empty-logs">
-          {{ emptyMessage }}
-        </div>
-      </div>
-    </div>
-    
+      </el-scrollbar>
+    </div>  
   </div>
+  <div>
+    <AlgorithmReport
+      :logs="logs"
+    />
+  </div>
+
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { ElScrollbar } from 'element-plus';
+import AlgorithmReport from './algorithmReport.vue';
 
 // 响应式数据
 const logs = ref([]);
@@ -217,19 +226,6 @@ const clearLogs = () => {
   logs.value = [];
 };
 
-// 复制调试信息
-const copyDebugInfo = () => {
-  debugInfo.value = `SSE连接调试信息:
-连接状态: ${connectionStatus.value}
-连接尝试次数: ${connectionAttempts.value}
-最后事件ID: ${lastEventId.value || '无'}
-当前日志条数: ${logs.value.length}
-最后日志时间: ${lastLogTime.value || '无'}
-用户代理: ${navigator.userAgent}
-当前时间: ${new Date().toISOString()}`;
-
-  navigator.clipboard.writeText(debugInfo.value);
-};
 
 // 生命周期钩子
 onMounted(connectToSSE);
@@ -310,13 +306,17 @@ button:hover {
 /* 添加横向滚动容器 */
 .log-display-container {
   flex: 1;
-  overflow: auto; /* 垂直滚动 */
   position: relative;
+}
+
+.scrollbar-wrapper {
+  height: 100vh;
+  overflow: auto; /* 垂直滚动 */
 }
 
 .log-display {
   width: max-content; /* 宽度由内容决定 */
-  height: 100%;
+  height: 35vh;
   overflow-y: auto; /* 保持垂直滚动 */
   overflow-x: auto; /* 添加横向滚动 */
   background-color: #1e1e1e;
