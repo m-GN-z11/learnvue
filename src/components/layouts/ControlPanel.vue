@@ -19,14 +19,12 @@
             @update:specificAlgorithm="emit('update:specificAlgorithm', $event)"
         />
 
-        <ConfigButton v-if="props.isMultiFrameMode"></ConfigButton>
         <el-button
             class="inference-button"
             @click="emit('infer')"
             :disabled="props.isLoading || !props.canInferInCurrentMode">
           {{ props.isMultiFrameMode ? '识别多帧' : '识别单帧' }}
         </el-button>
-        
       </el-col>
       <el-col :span="12" class="right-menu-buttons">
         <ActionButtons :is-loading="props.isLoading" @custom-action-3="emit('customAction3')" />
@@ -94,7 +92,6 @@
 import { ElRow, ElCol, ElButton, ElSelect, ElOption, ElInput, ElInputNumber } from 'element-plus';
 import AlgorithmSelector from '../ImgProcess/AlgorithmSelector.vue';
 import ActionButtons from '../ImgProcess/ActionButtons.vue';
-import ConfigButton from '../ImgProcess/ConfigButton.vue';
 
 const props = defineProps({
   selectedMode: String,
