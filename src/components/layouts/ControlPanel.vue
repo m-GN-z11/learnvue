@@ -19,9 +19,7 @@
             @update:specificAlgorithm="emit('update:specificAlgorithm', $event)"
         />
 
-        <RegionButton v-if="props.isMultiFrameMode"></RegionButton>
-        <AlgorithmButton v-if="props.isMultiFrameMode"></AlgorithmButton>
-
+        <ConfigButton v-if="props.isMultiFrameMode"></ConfigButton>
         <el-button
             class="inference-button"
             @click="emit('infer')"
@@ -96,8 +94,7 @@
 import { ElRow, ElCol, ElButton, ElSelect, ElOption, ElInput, ElInputNumber } from 'element-plus';
 import AlgorithmSelector from '../ImgProcess/AlgorithmSelector.vue';
 import ActionButtons from '../ImgProcess/ActionButtons.vue';
-import RegionButton from '../ImgProcess/RegionButton.vue';
-import AlgorithmButton from '../ImgProcess/AlgorithmButton.vue';
+import ConfigButton from '../ImgProcess/ConfigButton.vue';
 
 const props = defineProps({
   selectedMode: String,
