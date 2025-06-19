@@ -1,4 +1,4 @@
-/*multiFrameSystem.vue*/
+/*MultiFrameSystem.vue*/
 <template>
   <div class="multi-frame-system-wrapper">
     <div class="controls-bar-area">
@@ -45,31 +45,20 @@
       <div v-if="previewLoader.isLoadingFrame.value" class="image-placeholder">原始图像加载中...</div>
     </div>
   </div>
-  <div>
-    <ResultData
-        :idx="currentNavigationIndex"
-        :datamode="isInResultsMode"
-        :datavalue="featuresdata"
-    />
-  </div>
 </template>
 
 <script setup>
-// TODO: 临时位置，后续需要修改（第48行起是位置）
 import { computed, watch } from 'vue';
 import { ElImage, ElButton, ElSlider } from 'element-plus';
 import { Upload, Delete, ZoomIn, ZoomOut, ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue';
-import { useMultiFrameLoader } from '../../composables/useMultiFrameLoader';
-import { useNotifications } from '../../composables/useNotifications'
-import ResultData from './resultData.vue'
-
+import { useMultiFrameLoader } from '../../composables/useMultiFrameLoader.js';
+import { useNotifications } from '../../composables/useNotifications.js'
 
 const props = defineProps({
   zoomLevel: { type: Number, default: 100 },
   imageRows: { type: Number, required: true },
   imageCols: { type: Number, required: true },
   actualResultFrameCount: { type: Number, default: 0 },
-  featuresdata: { type: Object, required: true},
   currentResultFrameIndex: { type: Number, default: -1 }
 });
 
@@ -99,11 +88,11 @@ const currentNavigationIndex = computed(() => {
 
 const navControlsVisible = computed(() => navigationTotalFrames.value > 0);
 
-const isAnyFrameDisplayable = computed(() => { // 用于Zoom按钮的disabled状态
+const isAnyFrameDisplayable = computed(() => {
   if (isInResultsMode.value) {
-    return props.actualResultFrameCount > 0; // 如果有结果帧就可以缩放（结果图像在imgProcess中显示）
+    return props.actualResultFrameCount > 0;
   }
-  return !!previewLoader.currentFrameImageUrl.value && !previewLoader.isLoadingFrame.value; // 预览模式下看是否有预览图
+  return !!previewLoader.currentFrameImageUrl.value && !previewLoader.isLoadingFrame.value;
 });
 
 
@@ -115,13 +104,11 @@ const navigationFrameIndicatorText = computed(() => {
 });
 
 function handleSliderChange(newIndex) {
-  console.log(`[MultiFrameSystem.vue] 滑动条值改变，新索引: ${newIndex}, 当前模式: ${isInResultsMode.value ? '结果' : '预览'}`);
   if (isInResultsMode.value) {
     emit('update:currentResultFrameIndex', newIndex);
   } else {
     if (!previewLoader.isLoadingFrame.value) {
       previewLoader.loadFrame(newIndex);
-      console.log(`[MultiFrameSystem.vue] 预览加载器 loadFrame(${newIndex}) 后，currentIndex: ${previewLoader.currentIndex.value}`);
     }
   }
 }
@@ -132,7 +119,6 @@ function navigateFrames(direction) {
   if (newCalculatedIndex < 0) newCalculatedIndex = 0;
   if (newCalculatedIndex >= navigationTotalFrames.value) newCalculatedIndex = navigationTotalFrames.value - 1;
 
-  console.log(`[MultiFrameSystem.vue] 箭头导航，计算后新索引: ${newCalculatedIndex}, 当前模式: ${isInResultsMode.value ? '结果' : '预览'}`);
   if (isInResultsMode.value) {
     if (props.currentResultFrameIndex !== newCalculatedIndex) {
       emit('update:currentResultFrameIndex', newCalculatedIndex);
@@ -144,7 +130,6 @@ function navigateFrames(direction) {
       } else if (direction === 1 && previewLoader.currentIndex.value < previewLoader.totalFrames.value - 1) {
         previewLoader.nextFrame();
       }
-      console.log(`[MultiFrameSystem.vue] 预览加载器 prev/nextFrame 后，currentIndex: ${previewLoader.currentIndex.value}`);
     }
   }
 }
@@ -183,9 +168,9 @@ function requestFolderSelectionForPreview() {
 watch(previewLoader.currentFrameFile, (newFile) => {
 }, {deep: true});
 
-function loadFolderForPreview(htmlFileList) {
+function loadFolderForPreview(htmlFileList, precision) {
   if (props.imageRows > 0 && props.imageCols > 0) {
-    previewLoader.processSelectedFiles(htmlFileList, props.imageRows, props.imageCols);
+    previewLoader.processSelectedFiles(htmlFileList, props.imageRows, props.imageCols, precision);
     if (!isInResultsMode.value && previewLoader.totalFrames.value > 0) {
     }
   } else {
@@ -194,12 +179,7 @@ function loadFolderForPreview(htmlFileList) {
 }
 
 function handleDeleteAllPreviewFrames() {
-  let didClearPreview = false;
-  if (previewLoader.totalFrames.value > 0) {
-    previewLoader.clearFrames();
-    notifications.showNotification('所有预览帧已清除。');
-    didClearPreview = true;
-  }
+  const didClearPreview = previewLoader.totalFrames.value > 0;
   emit('delete-all-frames', { previewCleared: didClearPreview });
 }
 
@@ -216,9 +196,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   width: 100%;
-  border: 1px solid #ccc;
-  /*height: 60vh;*/
-  height: 40vh;
+  height: 100%;
 }
 
 .controls-bar-area {

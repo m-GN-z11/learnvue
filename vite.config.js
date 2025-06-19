@@ -1,9 +1,18 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
     plugins: [
-        vue() //  添加 Vue 插件
+        vue(),
+        AutoImport({
+            resolvers: [ElementPlusResolver()],
+        }),
+        Components({
+            resolvers: [ElementPlusResolver()],
+        })
     ],
 
     base: process.env.NODE_ENV === 'production' ? '/public/' : './',
@@ -37,7 +46,12 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
                 //rewrite: (path) => path.replace(/^\/api/, '')
+            },
+            '/sse': { // 新增 SSE 代理规则
+                target: 'http://localhost:8081',
+                changeOrigin: true,
             }
+
         }
     }
 })

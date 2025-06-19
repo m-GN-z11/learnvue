@@ -1,4 +1,4 @@
-/*appIndex.vue*/
+/*AppIndex.vue*/
 <template>
   <div id="index">
     <p>hello world!</p>
@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router'; // 导入 useRouter
+import { useRouter } from 'vue-router';
 
 export default {
   name: "AppIndex",

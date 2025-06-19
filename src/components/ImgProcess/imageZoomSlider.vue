@@ -1,4 +1,4 @@
-/*imageZoomSlider.vue*/
+/*ImageZoomSlider.vue*/
 <template>
   <div class="slider-input-container">
     <el-slider
@@ -17,7 +17,7 @@
 import { ElSlider } from 'element-plus';
 
 defineProps({
-  modelValue: { // for v-model
+  modelValue: {
     type: Number,
     default: 100,
   },
@@ -28,7 +28,6 @@ defineEmits(['update:modelValue', 'input']);
 <style scoped>
 .slider-input-container {
   width: 100%;
-  margin-top: 5px;
   display: flex;
   align-items: center;
 }

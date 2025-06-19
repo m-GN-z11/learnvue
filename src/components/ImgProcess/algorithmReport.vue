@@ -1,158 +1,137 @@
-/*algorithmReport*/
+/*AlgorithmReport.vue*/
 <template>
-    <div class="log-container">
-        <div class="head">
-          <span></span>
-          <span>算法运行情况</span>
-        </div>
-        <div class="log-display-container">
-          <el-scrollbar wrap-class="scrollbar-wrapper">
-            <div class="log-display">
-              <div 
-                v-for="(report, index) in reports" 
-                :key="index" 
-                :class="['log-entry', logLevelClass(report)]"
-              >
-                <span>{{ report }}</span>
-              </div>
-            </div>
-          </el-scrollbar>
-        </div>  
+  <div class="report-container">
+    <div class="head">
+      <span>算法运行报告</span>
     </div>
-    
+    <div class="report-display-container">
+      <el-scrollbar>
+        <div class="report-display">
+          <div v-if="reports.length === 0" class="empty-report">
+            等待算法运行...
+          </div>
+          <div
+              v-for="(report, index) in reports"
+              :key="index"
+              class="report-entry"
+          >
+            <span>{{ report }}</span>
+          </div>
+        </div>
+      </el-scrollbar>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { ElScrollbar } from 'element-plus';
-
 
 const props = defineProps({
   logs: {
     type: Array,
-    default: [],
+    required: true,
   },
 });
 
-
-
 const reports = ref([]);
 
-// 日志解析函数
-const extractTimestamp = (log) => 
-  (log.match(/^(\d{2}:\d{2}:\d{2}\.\d{3})/) || [])[1] || '';
+watch(() => props.logs.length, (newLength, oldLength) => {
+  oldLength = oldLength || 0;
 
-const extractThread = (log) => 
-  (log.match(/\[([^\]]+)\]/) || [])[1] || '';
+  if (newLength > oldLength) {
+    const newItems = props.logs.slice(oldLength);
 
-const extractLevel = (log) => 
-  (log.match(/\]\s+(\w+)(?:\s+|-\s+)/) || [])[1] || '';
+    newItems.forEach(log => {
+      const message = log.message;
+      let reportMessage = '';
 
-const extractLogger = (log) => 
-  (log.match(/\]\s+\w+\s+([^\s-]+)/) || [])[1] || '';
+      if (message.includes("调用C++ processImageWrapper (单帧模式)")) {
+        reportMessage = `[${log.timestamp}] 单帧处理算法启动`;
+      } else if (message.includes("C++ (单帧) 处理成功")) {
+        reportMessage = `[${log.timestamp}] 单帧处理算法结束`;
+      } else if (message.includes("调用C++ processImageWrapper (多帧模式)")) {
+        reportMessage = `[${log.timestamp}] 多帧处理算法启动`;
+      } else if (message.includes("C++ (多帧) 处理成功")) {
+        reportMessage = `[${log.timestamp}] 多帧处理算法结束`;
+      }
 
-const extractMessage = (log) => 
-  (log.match(/-\s+(.*)$/) || [])[1] || log;
+      if (reportMessage) {
+        reports.value.push(reportMessage);
+      }
+    });
+  }
+});
 
-const logLevelClass = (log) => {
-  const level = extractLevel(log);
-  return {
-    'log-error': level === 'ERROR',
-    'log-warn': level === 'WARN',
-    'log-info': level === 'INFO',
-    'log-debug': level === 'DEBUG',
-    'log-trace': level === 'TRACE'
-  };
+const clearReports = () => {
+  reports.value = [];
 };
 
-watch(() => [...props.logs], (newLogs) => {
-  reports.value = []; // 清空原有报告
-  newLogs.forEach(log => {
-    const message =extractMessage(log)
-    if (message.includes("调用C++ DLL进行单帧处理，算法:")) {
-      const timestamp = extractTimestamp(log);
-      reports.value.push(`[${timestamp}] 单帧处理算法启动 `);
-    }
-    else if(message.includes("单帧识别请求处理完成:")) {
-      const timestamp = extractTimestamp(log);
-      reports.value.push(`[${timestamp}] 单帧处理算法结束 `);
-    }
-    else if(message.includes("调用C++ processImageWrapper (多帧模式)")) {
-      const timestamp = extractTimestamp(log);
-      reports.value.push(`[${timestamp}] 多帧处理算法启动 `);
-    }
-    else if(message.includes("C++ (多帧) 处理成功。")) {
-      const timestamp = extractTimestamp(log);
-      reports.value.push(`[${timestamp}] 多帧处理算法结束 `);
-    }
-  });
-}, { immediate: true }); // 立即执行一次
-
+defineExpose({
+  clearReports,
+});
 
 </script>
 
 <style scoped>
-.head {
-  background-color: rgb(27, 40, 56);
-  width: 100%;
-  height: 5vh;
-}
-
-.log-container {
-  font-family: 'Courier New', monospace;
+.report-container {
+  font-family: "Microsoft YaHei", sans-serif;
   display: flex;
   flex-direction: column;
-  height: 50vh;
-  padding: 1rem;
-  background-color: #1e1e1e;
+  background-color: rgb(56, 56, 56);
+  border: 1px solid rgb(80, 80, 80);
+  border-radius: 6px;
   color: #d4d4d4;
   font-size: 14px;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 260px;
 }
 
-.log-display-container {
+.head {
+  color: #cce7ff;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgb(80, 80, 80);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.report-display-container {
   flex: 1;
   position: relative;
-}
-
-.scrollbar-wrapper {
-  height: 100vh;
-  overflow: auto; /* 垂直滚动 */
-}
-
-.log-display {
-  width: 100%; /* 宽度由内容决定 */
-  height: 40vh;
-  overflow-y: auto; /* 保持垂直滚动 */
-  overflow-x: auto; /* 添加横向滚动 */
   background-color: #1e1e1e;
-  border: 1px solid #3c3c3c;
   border-radius: 4px;
-  padding: 0.5rem;
+  max-height: 200px;
 }
 
-.empty-logs {
+.el-scrollbar {
+  height: 100%;
+}
+
+.report-display {
+  padding: 0.5rem;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.empty-report {
   color: #888;
   font-style: italic;
   text-align: center;
   padding: 2rem;
 }
 
-/* 日志条目样式 */
-.log-entry {
-  padding: 0.3rem 0;
+.report-entry {
+  padding: 4px 2px;
+  line-height: 1.5;
+  color: #9cdcfe;
+}
+
+.report-entry:not(:last-child) {
   border-bottom: 1px solid #2d2d2d;
-  display: grid;
-  gap: 8px;
-  line-height: 1.4;
 }
-
-.log-entry > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.timestamp { color: #6a9955; }  /* 绿色 */
-.message { white-space: normal; }
-
 </style>

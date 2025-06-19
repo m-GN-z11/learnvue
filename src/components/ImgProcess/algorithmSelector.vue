@@ -1,4 +1,4 @@
-/*algorithmSelector.vue*/
+/*AlgorithmSelector.vue*/
 <template>
   <div class="algorithm-selectors">
     <el-select :model-value="algorithmType" @update:modelValue="handleAlgorithmTypeChange" class="algorithm-select" placeholder="选择算法类型">
@@ -23,7 +23,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:algorithmType', 'update:specificAlgorithm']);
 
-// 更改对应算法传递给后端的标签
+// TODO: 后续算法名称在这里修改
 const traditionalAlgorithms = [
   { label: '光流法', value: 'opticalFlow' },
   { label: '多帧累积', value: 'multiFrameDifference' },

@@ -1,26 +1,14 @@
-/*mainImageViewer.vue*/
+/*MainImageViewer.vue*/
 <template>
   <div class="image-container" ref="imageContainerRef">
-    <SingleFrameSystem
-        :is-cropping="isCroppingActive"
-        :can-delete="!!imageUrl"
-        :can-crop="!!imageUrl"
-        :file-name="imageUrl ? imageNameFromProps : ''"
-        @file-selected="(file) => $emit('file-selected', file)"
-        @delete-image="$emit('delete-image')"
-        @zoom-in="$emit('zoom-in')"
-        @zoom-out="$emit('zoom-out')"
-        @toggle-crop="toggleCropping"
-        @confirm-crop="handleConfirmCrop"
-    />
     <el-image
         v-if="imageUrl && !isCroppingActive"
         :src="imageUrl"
         fit="contain"
         class="responsive-image"
         :style="{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center center' }"
-        ref="mainImageRef"
     ></el-image>
+
     <div v-if="!imageUrl && !isCroppingActive" class="image-placeholder">请上传图像</div>
 
     <Cropper
@@ -35,11 +23,10 @@
 </template>
 
 <script setup>
-import {computed, ref, watch} from 'vue';
+import { ref, defineExpose } from 'vue';
 import { ElImage } from 'element-plus';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
-import SingleFrameSystem from './singleFrameSystem.vue';
 
 const props = defineProps({
   imageUrl: String,
@@ -47,49 +34,34 @@ const props = defineProps({
     type: Number,
     default: 100,
   },
-  imageNameToDisplay: String,
+  isCroppingActive: Boolean,
 });
 
-const emit = defineEmits([
-  'file-selected',
-  'delete-image',
-  'zoom-in',
-  'zoom-out',
-  'crop-confirmed',
-]);
+const emit = defineEmits(['crop-confirmed']);
 
 const imageContainerRef = ref(null);
-const mainImageRef = ref(null);
 const cropperRef = ref(null);
-const isCroppingActive = ref(false);
-const imageNameFromProps = computed(() => props.imageNameToDisplay);
 
-function toggleCropping() {
-  if (!props.imageUrl) {
-    console.warn("Cannot crop without an image.");
-    return;
-  }
-  isCroppingActive.value = !isCroppingActive.value;
-}
-
-async function handleConfirmCrop() {
+/**
+ * @description 父组件可以通过调用此方法来获取裁剪结果
+ */
+async function confirmCrop() {
   if (!cropperRef.value) return;
   try {
     const { canvas, coordinates } = await cropperRef.value.getResult({ mimeType: 'image/png' });
+    // 将裁剪结果派发出去
     emit('crop-confirmed', {
       croppedImageBase64: canvas.toDataURL('image/png'),
       coordinates,
     });
-    isCroppingActive.value = false;
   } catch (error) {
     console.error('裁剪失败:', error);
   }
 }
 
-watch(() => props.imageUrl, (newUrl) => {
-  if (!newUrl) {
-    isCroppingActive.value = false;
-  }
+// 通过 defineExpose 将 confirmCrop 方法暴露给父组件
+defineExpose({
+  confirmCrop,
 });
 </script>
 
@@ -97,13 +69,12 @@ watch(() => props.imageUrl, (newUrl) => {
 .image-container {
   position: relative;
   width: 100%;
-  height: 60vh;
   display: flex;
   justify-content: center;
-  border: 1px solid #ccc;
   background-color: rgb(56, 56, 56);
   overflow: hidden;
   transition: all 0.3s ease;
+  flex: 1;
 }
 .responsive-image {
   max-width: 100%;
@@ -111,12 +82,6 @@ watch(() => props.imageUrl, (newUrl) => {
   object-fit: contain;
 }
 .image-placeholder {
-  position: absolute;
-  top: 20px; left: 0;
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: #aaa;
   font-size: 1.2rem;
 }

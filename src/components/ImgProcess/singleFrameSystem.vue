@@ -1,4 +1,4 @@
-/*singleFrameSystem.vue*/
+/*SingleFrameSystem.vue*/
 <template>
   <div class="display-controls-bar">
     <div class="control-buttons"> <input type="file" ref="fileInputRef" style="display: none" @change="onFileSelected" accept="image/*,.dat,.tif,.tiff,.bmp,.gif,.jpeg,.jpg,.png"> <el-button class="bar-btn" :icon="Upload" title="上传图像" @click="triggerFileUpload"></el-button>
@@ -39,9 +39,7 @@ function triggerFileUpload() {
 
 function onFileSelected(event) {
   const file = event.target.files?.[0];
-  console.log('[SingleFrameSystem] Input "change" event fired. File from event.target.files:', file); // <-- 日志1
   if (file) {
-    console.log(`[ImageDisplayControls] Emitting "file-selected" event with file: ${file.name}, type: ${file.type}, size: ${file.size}`); // <-- 日志2
     emit('file-selected', file);
   }
   if (event.target) {

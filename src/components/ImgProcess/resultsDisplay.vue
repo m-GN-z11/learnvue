@@ -1,4 +1,4 @@
-/*resultsDisplay.vue*/
+/*ResultsDisplay.vue*/
 <template>
   <div class="cropped-result-container">
     <div class="image-box">
@@ -57,9 +57,9 @@
 </template>
 
 <script setup>
-import { ElImage } from 'element-plus'; //
+import { ElImage } from 'element-plus';
 
-defineProps({ //
+defineProps({
   croppedImageUrl: String,
   resultImageUrl: String,
   textResults: Array,
