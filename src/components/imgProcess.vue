@@ -21,8 +21,12 @@
         @infer="handleInfer"
         @custom-action-3="handleCustomAction3"
         @confirm-manual-folder-path="confirmManualFolderPath"
+        v-model:isConfigEditorVisible="isConfigEditorVisible"
+        :current-config="currentConfig"
+        :on-open-config-editor="openConfigEditor"
+        :on-save-config="handleSaveConfig"
     />
-    <input type="file" ref="folderInputRef" style="display: none" webkitdirectory directory multiple @change="handleFolderSelectedViaDialog" />
+    <input type="file" ref="folderInputRef" style="display: none" webkitdirectory directory multiple @change="handleFolderSelectedViaDialog"/>
 
     <el-row :gutter="20" class="main-content-row">
       <el-col :span="12">
@@ -142,7 +146,7 @@ const multiFrameSystemRef = ref(null);
 const dataColumnRef = ref(null);
 const folderInputRef = ref(null);
 
-// 2. 调用编排器，获取所有需要的数据和方法 (这部分完全不变!)
+// 2. 调用编排器，获取所有需要的数据和方法
 const {
   // 状态和 Refs
   selectedMode, isMultiFrameMode, selectedAlgorithmType, selectedSpecificAlgorithm,
@@ -155,6 +159,10 @@ const {
   numberOfResultFrames,
   multiFrameRoiImage,
   multiFrameResultImage,
+  isConfigEditorVisible,
+  currentConfig,
+  openConfigEditor,
+  handleSaveConfig,
 
   // 方法
   handleModeChange, handleInfer, receiveFileFromMainViewer, handleDeleteSingleFrameImage,

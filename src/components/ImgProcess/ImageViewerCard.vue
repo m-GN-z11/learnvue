@@ -1,4 +1,4 @@
-// src/components/ImgProcess/ImageViewerCard.vue
+/*ImageViewerCard.vue*/
 <template>
   <div class="image-card">
     <el-image
@@ -50,7 +50,6 @@ defineProps({
   display: flex;
   justify-content: center;
   align-items: center;
-  /* 由父级Flexbox布局决定尺寸 */
   width: 100%;
   height: 100%;
 }
